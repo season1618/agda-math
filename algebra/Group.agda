@@ -109,14 +109,14 @@ record AbelGroup : Set₁ where
         *-comm : ∀ (x y : Group.G G) → (Group._*_ G) x y ≡ (Group._*_ G) y x
 
 record Hom (G₁ G₂ : Group) : Set₁ where
-    field
-        hom : Group.G G₁ → Group.G G₂
-        *-hom : ∀ (x y : Group.G G₁) → hom (Group._*_ G₁ x y) ≡ Group._*_ G₂ (hom x) (hom y)
-    
     _*₁_ = Group._*_ G₁
     _*₂_ = Group._*_ G₂
     e₁ = Group.e G₁
     e₂ = Group.e G₂
+
+    field
+        hom : Group.G G₁ → Group.G G₂
+        *-hom : ∀ (x y : Group.G G₁) → hom (x *₁ y) ≡ hom x *₂ hom y
 
     identity-preserve : hom e₁ ≡ e₂
     identity-preserve = Group.reductionL G₂ (hom e₁) (hom e₁) e₂ lemma where
