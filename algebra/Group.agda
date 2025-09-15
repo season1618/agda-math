@@ -62,6 +62,46 @@ record Group : Set₁ where
         ≡⟨ *-identityL y₂ ⟩
             y₂
         ∎
+    
+    reductionL : ∀ (x y z : G) → x * y ≡ x * z → y ≡ z
+    reductionL x y z xy=xz =
+        begin
+            y
+        ≡⟨ sym (*-identityL y) ⟩
+            e * y
+        ≡⟨ cong (λ t → t * y) (sym (*-inverseL x)) ⟩
+            (/ x * x) * y
+        ≡⟨ *-assoc (/ x) x y ⟩
+            / x * (x * y)
+        ≡⟨ cong (_*_ (/ x)) xy=xz ⟩
+            / x * (x * z)
+        ≡⟨ sym (*-assoc (/ x) x z) ⟩
+            (/ x * x) * z
+        ≡⟨ cong (λ t → t * z) (*-inverseL x) ⟩
+            e * z
+        ≡⟨ *-identityL z ⟩
+            z
+        ∎
+    
+    reductionR : ∀ (x y z : G) → y * x ≡ z * x → y ≡ z
+    reductionR x y z yx=zx =
+        begin
+            y
+        ≡⟨ sym (*-identityR y) ⟩
+            y * e
+        ≡⟨ cong (_*_ y) (sym (*-inverseR x)) ⟩
+            y * (x * / x)
+        ≡⟨ sym (*-assoc y x (/ x)) ⟩
+            (y * x) * / x
+        ≡⟨ cong (λ t → t *  (/ x)) yx=zx ⟩
+            (z * x) * / x
+        ≡⟨ *-assoc z x (/ x) ⟩
+            z * (x * / x)
+        ≡⟨ cong (_*_ z) (*-inverseR x) ⟩
+            z * e
+        ≡⟨ *-identityR z ⟩
+            z
+        ∎
 
 record AbelGroup : Set₁ where
     field
@@ -78,9 +118,6 @@ record _≅_ (G₁ G₂ : Group) : Set₁ where
         from : Hom G₁ G₂
         to   : Hom G₂ G₁
         inverse : let f = Hom.hom from in let g = Hom.hom to in (f ∘ g ≡ id) × (g ∘ f ≡ id)
-
--- identity-preserve : ∀ {G₁ G₂ : Group} → (f : Hom G₁ G₂) → (Hom.hom f) (Group.e G₁) ≡ Group.e G₂
--- identity-preserve f 
 
 Group-ℤ : Group
 Group-ℤ = record
