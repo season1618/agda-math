@@ -1,5 +1,5 @@
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; sym)
+open Eq using (_≡_; cong; sym)
 open Eq.≡-Reasoning using (begin_; step-≡-∣; step-≡-⟩; _∎)
 open import Function.Base using (_∘_; id)
 open import Data.Product using (_×_; proj₁; proj₂)
@@ -38,6 +38,30 @@ record Group : Set₁ where
             e₂
         ∎
 
+    InverseL : G → G → Set
+    InverseL x y = y * x ≡ e
+
+    InverseR : G → G → Set
+    InverseR x y = x * y ≡ e
+
+    Inverse : G → G → Set
+    Inverse x y = InverseL x y × InverseR x y
+
+    inverse-unique : ∀ (x y₁ y₂ : G) → Inverse x y₁ → Inverse x y₂ → y₁ ≡ y₂
+    inverse-unique x y₁ y₂ inverse1 inverse2 =
+        begin
+            y₁
+        ≡⟨ sym (*-identityR y₁) ⟩
+            y₁ * e
+        ≡⟨ cong (_*_ y₁) (sym (proj₂ inverse2)) ⟩
+            y₁ * (x * y₂)
+        ≡⟨ sym (*-assoc y₁ x y₂) ⟩
+            (y₁ * x) * y₂
+        ≡⟨ cong (λ x → x * y₂) (proj₁ inverse1) ⟩
+            e * y₂
+        ≡⟨ *-identityL y₂ ⟩
+            y₂
+        ∎
 
 record AbelGroup : Set₁ where
     field
