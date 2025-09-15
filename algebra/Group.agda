@@ -1,5 +1,6 @@
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_)
+open Eq using (_≡_; sym)
+open Eq.≡-Reasoning using (begin_; step-≡-∣; step-≡-⟩; _∎)
 open import Function.Base using (_∘_; id)
 open import Data.Product using (_×_; proj₁; proj₂)
 import Data.Integer.Base as Int using (ℤ; +_; +0; _+_; -_; _*_)
@@ -17,6 +18,26 @@ record Group : Set₁ where
         *-identityR : ∀ (x : G) → x * e ≡ x
         *-inverseL : ∀ (x : G) → / x * x ≡ e
         *-inverseR : ∀ (x : G) → x * / x ≡ e
+    
+    IdentityL : G → Set
+    IdentityL e = ∀ (x : G) → e * x ≡ x
+
+    IdentityR : G → Set
+    IdentityR e = ∀ (x : G) → x * e ≡ x
+
+    Identity : G → Set
+    Identity e = IdentityL e × IdentityR e
+
+    identity-unique : ∀ (e₁ e₂ : G) → Identity e₁ → Identity e₂ → e₁ ≡ e₂
+    identity-unique e₁ e₂ identity1 identity2 =
+        begin
+            e₁
+        ≡⟨ sym (proj₂ identity2 e₁) ⟩
+            e₁ * e₂
+        ≡⟨ proj₁ identity1 e₂ ⟩
+            e₂
+        ∎
+
 
 record AbelGroup : Set₁ where
     field
@@ -33,6 +54,9 @@ record _≅_ (G₁ G₂ : Group) : Set₁ where
         from : Hom G₁ G₂
         to   : Hom G₂ G₁
         inverse : let f = Hom.hom from in let g = Hom.hom to in (f ∘ g ≡ id) × (g ∘ f ≡ id)
+
+-- identity-preserve : ∀ {G₁ G₂ : Group} → (f : Hom G₁ G₂) → (Hom.hom f) (Group.e G₁) ≡ Group.e G₂
+-- identity-preserve f 
 
 Group-ℤ : Group
 Group-ℤ = record
