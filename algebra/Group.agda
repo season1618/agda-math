@@ -113,6 +113,8 @@ record Hom (G₁ G₂ : Group) : Set₁ where
     _*₂_ = Group._*_ G₂
     e₁ = Group.e G₁
     e₂ = Group.e G₂
+    /₁ = Group./ G₁
+    /₂ = Group./ G₂
 
     field
         hom : Group.G G₁ → Group.G G₂
@@ -130,6 +132,22 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                 hom e₁
             ≡⟨ sym (Group.*-identityR G₂ (hom e₁)) ⟩
                 hom e₁ *₂ e₂
+            ∎
+
+    inverse-preserve : ∀ (x : Group.G G₁) → hom (/₁ x) ≡ /₂ (hom x)
+    inverse-preserve x = Group.reductionL G₂ (hom x) (hom (/₁ x)) (/₂ (hom x)) lemma where
+        lemma : hom x *₂ hom (/₁ x) ≡ hom x *₂ /₂ (hom x)
+        lemma =
+            begin
+                hom x *₂ hom (/₁ x)
+            ≡⟨ sym (*-hom x (/₁ x)) ⟩
+                hom (x *₁ /₁ x)
+            ≡⟨ cong hom (Group.*-inverseR G₁ x) ⟩
+                hom e₁
+            ≡⟨ identity-preserve ⟩
+                e₂
+            ≡⟨ sym (Group.*-inverseR G₂ (hom x)) ⟩
+                hom x *₂ /₂ (hom x)
             ∎
 
 record _≅_ (G₁ G₂ : Group) : Set₁ where
