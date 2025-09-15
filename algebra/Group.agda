@@ -1,5 +1,7 @@
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_)
+open import Function.Base using (_∘_; id)
+open import Data.Product using (_×_; proj₁; proj₂)
 import Data.Integer.Base as Int using (ℤ; +_; +0; _+_; -_; _*_)
 import Data.Integer.Properties as Int using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm; *-distribˡ-+)
 
@@ -23,8 +25,14 @@ record AbelGroup : Set₁ where
 
 record Hom (G₁ G₂ : Group) : Set₁ where
     field
-        f : Group.G G₁ → Group.G G₂
-        *-hom : ∀ (x y : Group.G G₁) → f (Group._*_ G₁ x y) ≡ Group._*_ G₂ (f x) (f y)
+        hom : Group.G G₁ → Group.G G₂
+        *-hom : ∀ (x y : Group.G G₁) → hom (Group._*_ G₁ x y) ≡ Group._*_ G₂ (hom x) (hom y)
+
+record _≅_ (G₁ G₂ : Group) : Set₁ where
+    field
+        from : Hom G₁ G₂
+        to   : Hom G₂ G₁
+        inverse : let f = Hom.hom from in let g = Hom.hom to in (f ∘ g ≡ id) × (g ∘ f ≡ id)
 
 Group-ℤ : Group
 Group-ℤ = record
@@ -51,6 +59,6 @@ twice = Int._*_ (Int.+ 2)
 
 twice-hom : Hom Group-ℤ Group-ℤ
 twice-hom = record
-    { f = twice
+    { hom = twice
     ; *-hom = Int.*-distribˡ-+ (Int.+ 2)
     }
