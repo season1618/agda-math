@@ -112,6 +112,25 @@ record Hom (G₁ G₂ : Group) : Set₁ where
     field
         hom : Group.G G₁ → Group.G G₂
         *-hom : ∀ (x y : Group.G G₁) → hom (Group._*_ G₁ x y) ≡ Group._*_ G₂ (hom x) (hom y)
+    
+    _*₁_ = Group._*_ G₁
+    _*₂_ = Group._*_ G₂
+    e₁ = Group.e G₁
+    e₂ = Group.e G₂
+
+    identity-preserve : hom e₁ ≡ e₂
+    identity-preserve = Group.reductionL G₂ (hom e₁) (hom e₁) e₂ lemma where
+        lemma : hom e₁ *₂ hom e₁ ≡ hom e₁ *₂ e₂
+        lemma =
+            begin
+                hom e₁ *₂ hom e₁
+            ≡⟨ sym (*-hom e₁ e₁) ⟩
+                hom (e₁ *₁ e₁)
+            ≡⟨ cong hom (Group.*-identityL G₁ e₁) ⟩
+                hom e₁
+            ≡⟨ sym (Group.*-identityR G₂ (hom e₁)) ⟩
+                hom e₁ *₂ e₂
+            ∎
 
 record _≅_ (G₁ G₂ : Group) : Set₁ where
     field
