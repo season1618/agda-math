@@ -1,7 +1,7 @@
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_)
-open import Data.Integer.Base using (ℤ; +0; _+_; -_)
-open import Data.Integer.Properties using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm)
+import Data.Integer.Base as Int using (ℤ; +0; _+_; -_)
+import Data.Integer.Properties as Int using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm)
 
 record Group : Set₁ where
     field
@@ -23,21 +23,21 @@ record AbelGroup : Set₁ where
 
 Group-ℤ : Group
 Group-ℤ = record
-    { G = ℤ
-    ; _*_ = _+_
-    ; e = +0
-    ; / = -_
+    { G = Int.ℤ
+    ; _*_ = Int._+_
+    ; e = Int.+0
+    ; / = Int.-_
 
-    ; *-assoc = +-assoc
-    ; *-identityL = +-identityˡ
-    ; *-identityR = +-identityʳ
-    ; *-inverseL = +-inverseˡ
-    ; *-inverseR = +-inverseʳ
+    ; *-assoc = Int.+-assoc
+    ; *-identityL = Int.+-identityˡ
+    ; *-identityR = Int.+-identityʳ
+    ; *-inverseL = Int.+-inverseˡ
+    ; *-inverseR = Int.+-inverseʳ
     }
 
 AbelGroup-ℤ : AbelGroup
 AbelGroup-ℤ = record
     { G = Group-ℤ
-    ; *-comm = +-comm
+    ; *-comm = Int.+-comm
     }
 
