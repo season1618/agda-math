@@ -1,7 +1,7 @@
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_)
 open import Data.Integer.Base using (ℤ; +0; _+_; -_)
-open import Data.Integer.Properties using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ)
+open import Data.Integer.Properties using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm)
 
 record Group : Set₁ where
     field
@@ -16,6 +16,11 @@ record Group : Set₁ where
         *-inverseL : ∀ (x : G) → / x * x ≡ e
         *-inverseR : ∀ (x : G) → x * / x ≡ e
 
+record AbelGroup : Set₁ where
+    field
+        G : Group
+        *-comm : ∀ (x y : Group.G G) → (Group._*_ G) x y ≡ (Group._*_ G) y x
+
 Group-ℤ : Group
 Group-ℤ = record
     { G = ℤ
@@ -28,5 +33,11 @@ Group-ℤ = record
     ; *-identityR = +-identityʳ
     ; *-inverseL = +-inverseˡ
     ; *-inverseR = +-inverseʳ
+    }
+
+AbelGroup-ℤ : AbelGroup
+AbelGroup-ℤ = record
+    { G = Group-ℤ
+    ; *-comm = +-comm
     }
 
