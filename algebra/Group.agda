@@ -113,6 +113,43 @@ record AbelGroup : Set₁ where
         G : Group
         *-comm : ∀ (x y : Group.G G) → (Group._*_ G) x y ≡ (Group._*_ G) y x
 
+record Subgroup (G : Group) : Set₁ where
+    S = Group.G G
+    _*_ = Group._*_ G
+    e = Group.e G
+    / = Group./ G
+
+    field
+        P : S → Set
+        .*-closure : ∀ (x y : S) → P x → P y → P (x * y)
+        *-identity : P e
+        .*-inverse : ∀ (x : S) → P x → P (/ x)
+
+    group : Group
+    group = record
+        { G = T
+        ; _*_ = _*'_
+        ; e = e'
+        ; / = /'
+
+        ; *-assoc = \x y z → cong-spec ((x *' y) *' z) (x *' (y *' z)) (Group.*-assoc G (Spec.elem x) (Spec.elem y) (Spec.elem z))
+        ; *-identityL = \x → cong-spec (e' *' x) x (Group.*-identityL G (Spec.elem x))
+        ; *-identityR = \x → cong-spec (x *' e') x (Group.*-identityR G (Spec.elem x))
+        ; *-inverseL = \x → cong-spec (/' x *' x) e' (Group.*-inverseL G (Spec.elem x))
+        ; *-inverseR = \x → cong-spec (x *' /' x) e' (Group.*-inverseR G (Spec.elem x))
+        } where
+            T : Set
+            T = Spec S P
+
+            _*'_ : T → T → T
+            _*'_ ⟨ x , px ⟩ ⟨ y , py ⟩ = ⟨ x * y , *-closure x y px py ⟩
+
+            e' : T
+            e' = ⟨ e , *-identity ⟩
+
+            /' : T → T
+            /' ⟨ x , px ⟩ = ⟨ / x , *-inverse x px ⟩
+
 record Hom (G₁ G₂ : Group) : Set₁ where
     S₁ = Group.G G₁
     S₂ = Group.G G₂
@@ -157,6 +194,41 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                 fun x *₂ /₂ (fun x)
             ∎
 
+    KerSubgroup : Subgroup G₁
+    KerSubgroup = record
+        { P = \x → fun x ≡ e₂
+        ; *-closure = *-closure'
+        ; *-identity = identity-preserve
+        ; *-inverse = *-inverse'
+        } where
+            .*-closure' : ∀ (x y : S₁) → fun x ≡ e₂ → fun y ≡ e₂ → fun (x *₁ y) ≡ e₂
+            *-closure' x y fx=e fy=e = fxy=e where
+                .fxy=e : fun (x *₁ y) ≡ e₂
+                fxy=e =
+                    begin
+                        fun (x *₁ y)
+                    ≡⟨ *-preserve x y ⟩
+                        fun x *₂ fun y
+                    ≡⟨ cong (_*₂ fun y) (irrAx fx=e) ⟩
+                        e₂ *₂ fun y
+                    ≡⟨ cong (e₂ *₂_) (irrAx fy=e) ⟩
+                        e₂ *₂ e₂
+                    ≡⟨ Group.*-identityL G₂ e₂ ⟩
+                        e₂
+                    ∎
+            .*-inverse' : ∀ (x : S₁) → fun x ≡ e₂ → fun (/₁ x) ≡ e₂
+            *-inverse' x fx=e = fx⁻¹=e where
+                .fx⁻¹=e : fun (/₁ x) ≡ e₂
+                fx⁻¹=e =
+                    begin
+                        fun (/₁ x)
+                    ≡⟨ inverse-preserve x ⟩
+                        /₂ (fun x)
+                    ≡⟨ cong /₂ (irrAx fx=e) ⟩
+                        /₂ e₂ 
+                    ≡⟨ Group.inverse-identity G₂ ⟩
+                        e₂
+                    ∎
     Ker : Group
     Ker = record
         { G = SetKer
