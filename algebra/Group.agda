@@ -209,9 +209,9 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                         fun (x *₁ y)
                     ≡⟨ *-preserve x y ⟩
                         fun x *₂ fun y
-                    ≡⟨ cong (_*₂ fun y) (irrAx fx=e) ⟩
+                    ≡⟨ cong (_*₂ fun y) fx=e ⟩
                         e₂ *₂ fun y
-                    ≡⟨ cong (e₂ *₂_) (irrAx fy=e) ⟩
+                    ≡⟨ cong (e₂ *₂_) fy=e ⟩
                         e₂ *₂ e₂
                     ≡⟨ Group.*-identityL G₂ e₂ ⟩
                         e₂
@@ -224,7 +224,7 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                         fun (/₁ x)
                     ≡⟨ inverse-preserve x ⟩
                         /₂ (fun x)
-                    ≡⟨ cong /₂ (irrAx fx=e) ⟩
+                    ≡⟨ cong /₂ fx=e ⟩
                         /₂ e₂ 
                     ≡⟨ Group.inverse-identity G₂ ⟩
                         e₂
@@ -293,9 +293,9 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                         fun (x' *₁ y')
                     ≡⟨ *-preserve x' y' ⟩
                         fun x' *₂ fun y'
-                    ≡⟨ cong (_*₂ fun y') (irrAx fx'=x) ⟩
+                    ≡⟨ cong (_*₂ fun y') fx'=x ⟩
                         x *₂ fun y'
-                    ≡⟨ cong (x *₂_) (irrAx fy'=y) ⟩
+                    ≡⟨ cong (x *₂_) fy'=y ⟩
                         x *₂ y
                     ∎
             .*-inverse' : ∀ (x : S₂) → ∃[ x' ] fun x' ≡ x → ∃[ /x' ] fun /x' ≡ /₂ x
@@ -306,7 +306,7 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                         fun (/₁ x')
                     ≡⟨ inverse-preserve x' ⟩
                         /₂ (fun x')
-                    ≡⟨ cong /₂ (irrAx fx'=x) ⟩
+                    ≡⟨ cong /₂ fx'=x ⟩
                         /₂ x
                     ∎
 
