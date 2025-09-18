@@ -2,7 +2,7 @@ import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; cong; sym)
 open Eq.≡-Reasoning using (begin_; step-≡-∣; step-≡-⟩; _∎)
 open import Function.Base using (_∘_; id)
-open import Data.Product using (_×_; proj₁; proj₂)
+open import Data.Product using (_,_; _×_; proj₁; proj₂)
 import Data.Integer.Base as Int using (ℤ; +_; +0; _+_; -_; _*_)
 import Data.Integer.Properties as Int using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm; *-distribˡ-+)
 
@@ -64,7 +64,10 @@ record Group : Set₁ where
         ≡⟨ *-identityL y₂ ⟩
             y₂
         ∎
-    
+
+    inverse-identity : / e ≡ e
+    inverse-identity = inverse-unique e (/ e) e (*-inverseL e , *-inverseR e) (*-identityL e , *-identityR e)
+
     reductionL : ∀ (x y z : G) → x * y ≡ x * z → y ≡ z
     reductionL x y z xy=xz =
         begin
@@ -195,15 +198,11 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                 fx⁻¹=e =
                     begin
                         fun (/₁ x)
-                    ≡⟨ sym (Group.*-identityL G₂ (fun (/₁ x))) ⟩
-                        e₂ *₂ fun (/₁ x)
-                    ≡⟨ sym (cong (_*₂ fun (/₁ x)) (irrAx fx=e)) ⟩
-                        fun x *₂ fun (/₁ x)
-                    ≡⟨ sym (*-preserve x (/₁ x)) ⟩
-                        fun (x *₁ (/₁ x))
-                    ≡⟨ cong fun (Group.*-inverseR G₁ x) ⟩
-                        fun e₁
-                    ≡⟨ identity-preserve ⟩
+                    ≡⟨ inverse-preserve x ⟩
+                        /₂ (fun x)
+                    ≡⟨ cong /₂ (irrAx fx=e) ⟩
+                        /₂ e₂ 
+                    ≡⟨ Group.inverse-identity G₂ ⟩
                         e₂
                     ∎
 
