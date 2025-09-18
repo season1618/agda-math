@@ -55,11 +55,11 @@ record Group : Set₁ where
             y₁
         ≡⟨ sym (*-identityR y₁) ⟩
             y₁ * e
-        ≡⟨ cong (_*_ y₁) (sym (proj₂ inverse2)) ⟩
+        ≡⟨ cong (y₁ *_) (sym (proj₂ inverse2)) ⟩
             y₁ * (x * y₂)
         ≡⟨ sym (*-assoc y₁ x y₂) ⟩
             (y₁ * x) * y₂
-        ≡⟨ cong (λ x → x * y₂) (proj₁ inverse1) ⟩
+        ≡⟨ cong (_* y₂) (proj₁ inverse1) ⟩
             e * y₂
         ≡⟨ *-identityL y₂ ⟩
             y₂
@@ -71,15 +71,15 @@ record Group : Set₁ where
             y
         ≡⟨ sym (*-identityL y) ⟩
             e * y
-        ≡⟨ cong (λ t → t * y) (sym (*-inverseL x)) ⟩
+        ≡⟨ cong (_* y) (sym (*-inverseL x)) ⟩
             (/ x * x) * y
         ≡⟨ *-assoc (/ x) x y ⟩
             / x * (x * y)
-        ≡⟨ cong (_*_ (/ x)) xy=xz ⟩
+        ≡⟨ cong (/ x *_) xy=xz ⟩
             / x * (x * z)
         ≡⟨ sym (*-assoc (/ x) x z) ⟩
             (/ x * x) * z
-        ≡⟨ cong (λ t → t * z) (*-inverseL x) ⟩
+        ≡⟨ cong (_* z) (*-inverseL x) ⟩
             e * z
         ≡⟨ *-identityL z ⟩
             z
@@ -91,15 +91,15 @@ record Group : Set₁ where
             y
         ≡⟨ sym (*-identityR y) ⟩
             y * e
-        ≡⟨ cong (_*_ y) (sym (*-inverseR x)) ⟩
+        ≡⟨ cong (y *_) (sym (*-inverseR x)) ⟩
             y * (x * / x)
         ≡⟨ sym (*-assoc y x (/ x)) ⟩
             (y * x) * / x
-        ≡⟨ cong (λ t → t *  (/ x)) yx=zx ⟩
+        ≡⟨ cong (_* (/ x)) yx=zx ⟩
             (z * x) * / x
         ≡⟨ *-assoc z x (/ x) ⟩
             z * (x * / x)
-        ≡⟨ cong (_*_ z) (*-inverseR x) ⟩
+        ≡⟨ cong (z *_) (*-inverseR x) ⟩
             z * e
         ≡⟨ *-identityR z ⟩
             z
@@ -176,9 +176,9 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                         hom (x *₁ y)
                     ≡⟨ *-hom x y ⟩
                         hom x *₂ hom y
-                    ≡⟨ cong (λ t → t *₂ hom y) (irrAx fx=e) ⟩
+                    ≡⟨ cong (_*₂ hom y) (irrAx fx=e) ⟩
                         e₂ *₂ hom y
-                    ≡⟨ cong (_*₂_ e₂) (irrAx fy=e) ⟩
+                    ≡⟨ cong (e₂ *₂_) (irrAx fy=e) ⟩
                         e₂ *₂ e₂
                     ≡⟨ Group.*-identityL G₂ e₂ ⟩
                         e₂
@@ -195,7 +195,7 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                         hom (/₁ x)
                     ≡⟨ sym (Group.*-identityL G₂ (hom (/₁ x))) ⟩
                         e₂ *₂ hom (/₁ x)
-                    ≡⟨ sym (cong (\t → t *₂ hom (/₁ x)) (irrAx fx=e)) ⟩
+                    ≡⟨ sym (cong (_*₂ hom (/₁ x)) (irrAx fx=e)) ⟩
                         hom x *₂ hom (/₁ x)
                     ≡⟨ sym (*-hom x (/₁ x)) ⟩
                         hom (x *₁ (/₁ x))
