@@ -1,10 +1,12 @@
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; cong; sym)
+open Eq using (_≡_; refl; cong; sym)
 open Eq.≡-Reasoning using (begin_; step-≡-∣; step-≡-⟩; _∎)
 open import Function.Base using (_∘_; id)
 open import Data.Product using (_×_; proj₁; proj₂)
 import Data.Integer.Base as Int using (ℤ; +_; +0; _+_; -_; _*_)
 import Data.Integer.Properties as Int using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm; *-distribˡ-+)
+
+open import Irrelevance using (irrAx; Spec; ⟨_,_⟩; cong-spec)
 
 record Group : Set₁ where
     field
@@ -149,6 +151,59 @@ record Hom (G₁ G₂ : Group) : Set₁ where
             ≡⟨ sym (Group.*-inverseR G₂ (hom x)) ⟩
                 hom x *₂ /₂ (hom x)
             ∎
+
+    Ker : Group
+    Ker = record
+        { G = SetKer
+        ; _*_ = _*'_
+        ; e = e'
+        ; / = /'
+
+        ; *-assoc = \x y z → cong-spec ((x *' y) *' z) (x *' (y *' z)) (Group.*-assoc G₁ (Spec.x x) (Spec.x y) (Spec.x z))
+        ; *-identityL = \x → cong-spec (e' *' x) x (Group.*-identityL G₁ (Spec.x x))
+        ; *-identityR = \x → cong-spec (x *' e') x (Group.*-identityR G₁ (Spec.x x))
+        ; *-inverseL = \x → cong-spec (/' x *' x) e' (Group.*-inverseL G₁ (Spec.x x))
+        ; *-inverseR = \x → cong-spec (x *' /' x) e' (Group.*-inverseR G₁ (Spec.x x))
+        } where
+            SetKer : Set
+            SetKer = Spec (Group.G G₁) (\x → hom x ≡ e₂)
+
+            _*'_ : SetKer → SetKer → SetKer
+            _*'_ ⟨ x , fx=e ⟩ ⟨ y , fy=e ⟩ = ⟨ x *₁ y , fxy=e ⟩ where
+                .fxy=e : hom (x *₁ y) ≡ e₂
+                fxy=e =
+                    begin
+                        hom (x *₁ y)
+                    ≡⟨ *-hom x y ⟩
+                        hom x *₂ hom y
+                    ≡⟨ cong (λ t → t *₂ hom y) (irrAx fx=e) ⟩
+                        e₂ *₂ hom y
+                    ≡⟨ cong (_*₂_ e₂) (irrAx fy=e) ⟩
+                        e₂ *₂ e₂
+                    ≡⟨ Group.*-identityL G₂ e₂ ⟩
+                        e₂
+                    ∎
+            
+            e' : SetKer
+            e' = ⟨ e₁ , identity-preserve ⟩
+
+            /' : SetKer → SetKer
+            /' ⟨ x , fx=e ⟩ = ⟨ /₁ x , fx⁻¹=e ⟩ where
+                .fx⁻¹=e : hom (/₁ x) ≡ e₂
+                fx⁻¹=e =
+                    begin
+                        hom (/₁ x)
+                    ≡⟨ sym (Group.*-identityL G₂ (hom (/₁ x))) ⟩
+                        e₂ *₂ hom (/₁ x)
+                    ≡⟨ sym (cong (\t → t *₂ hom (/₁ x)) (irrAx fx=e)) ⟩
+                        hom x *₂ hom (/₁ x)
+                    ≡⟨ sym (*-hom x (/₁ x)) ⟩
+                        hom (x *₁ (/₁ x))
+                    ≡⟨ cong hom (Group.*-inverseR G₁ x) ⟩
+                        hom e₁
+                    ≡⟨ identity-preserve ⟩
+                        e₂
+                    ∎
 
 record _≅_ (G₁ G₂ : Group) : Set₁ where
     field
