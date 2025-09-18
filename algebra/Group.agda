@@ -341,6 +341,38 @@ _∘*_ G₁ G₂ G₃ ψ φ =
         ; *-preserve = h-hom
         }
 
+≅-trans : ∀ (G₁ G₂ G₃ : Group) → G₁ ≅ G₂ → G₂ ≅ G₃ → G₁ ≅ G₃
+≅-trans G₁ G₂ G₃
+    record { from = φ@record { fun = f } ; to = φ⁻¹@record{ fun = f⁻¹ } ; inverse = (ff⁻¹=id , f⁻¹f=id) }
+    record { from = ψ@record { fun = g } ; to = ψ⁻¹@record{ fun = g⁻¹ } ; inverse = (gg⁻¹=id , g⁻¹g=id) } =
+    let γ = _∘*_ G₁ G₂ G₃ ψ φ
+        γ⁻¹ = _∘*_ G₃ G₂ G₁ φ⁻¹ ψ⁻¹
+        h = g ∘ f
+        h⁻¹ = f⁻¹ ∘ g⁻¹
+        h-inverse1 : h ∘ h⁻¹ ≡ id
+        h-inverse1 =
+            begin
+                (g ∘ f) ∘ (f⁻¹ ∘ g⁻¹)
+            ≡⟨ cong (\i → g ∘ i ∘ g⁻¹) ff⁻¹=id ⟩
+                g ∘ id ∘ g⁻¹
+            ≡⟨ gg⁻¹=id ⟩
+                id
+            ∎
+        h-inverse2 : h⁻¹ ∘ h ≡ id
+        h-inverse2 =
+            begin
+                (f⁻¹ ∘ g⁻¹) ∘ (g ∘ f)
+            ≡⟨ cong (\i → f⁻¹ ∘ i ∘ f) g⁻¹g=id ⟩
+                f⁻¹ ∘ id ∘ f
+            ≡⟨ f⁻¹f=id ⟩
+                id
+            ∎
+    in record
+        { from = γ
+        ; to   = γ⁻¹
+        ; inverse = h-inverse1 , h-inverse2
+        }
+
 Group-ℤ : Group
 Group-ℤ = record
     { G = Int.ℤ
