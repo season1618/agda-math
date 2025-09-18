@@ -316,6 +316,31 @@ record _≅_ (G₁ G₂ : Group) : Set₁ where
         to   : Hom G₂ G₁
         inverse : let f = Hom.fun from in let g = Hom.fun to in (f ∘ g ≡ id) × (g ∘ f ≡ id)
 
+_∘*_ : ∀ (G₁ G₂ G₃ : Group) → Hom G₂ G₃ → Hom G₁ G₂ → Hom G₁ G₃
+_∘*_ G₁ G₂ G₃ ψ φ =
+    let S₁ = Group.G G₁
+        S₂ = Group.G G₂
+        S₃ = Group.G G₃
+        _*₁_ = Group._*_ G₁
+        _*₂_ = Group._*_ G₂
+        _*₃_ = Group._*_ G₃
+        f = Hom.fun φ
+        g = Hom.fun ψ
+        h = g ∘ f
+        h-hom : ∀ (x y : S₁) → h (x *₁ y) ≡ h x *₃ h y
+        h-hom x y =
+            begin
+                (g ∘ f) (x *₁ y)
+            ≡⟨ cong g (Hom.*-preserve φ x y) ⟩
+                g (f x *₂ f y)
+            ≡⟨ Hom.*-preserve ψ (f x) (f y) ⟩
+                g (f x) *₃ g (f y)
+            ∎
+    in record
+        { fun = h
+        ; *-preserve = h-hom
+        }
+
 Group-ℤ : Group
 Group-ℤ = record
     { G = Int.ℤ
