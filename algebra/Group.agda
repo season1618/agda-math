@@ -378,6 +378,19 @@ _∘*_ G₁ G₂ G₃ ψ φ =
     record { from = φ; to = φ⁻¹; inverse = (ff⁻¹=id , f⁻¹f=id) } =
     record { from = φ⁻¹; to = φ; inverse = (f⁻¹f=id , ff⁻¹=id) }
 
+id-hom : (G : Group) → Hom G G
+id-hom G = record
+    { fun = id
+    ; *-preserve = \_ _ → refl
+    }
+
+id-iso : (G : Group) → G ≅ G
+id-iso G = record
+    { from = id-hom G
+    ; to   = id-hom G
+    ; inverse = refl , refl
+    }
+
 Group-ℤ : Group
 Group-ℤ = record
     { G = Int.ℤ
