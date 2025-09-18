@@ -373,6 +373,11 @@ _∘*_ G₁ G₂ G₃ ψ φ =
         ; inverse = h-inverse1 , h-inverse2
         }
 
+≅-sym : ∀ (G₁ G₂ : Group) → G₁ ≅ G₂ → G₂ ≅ G₁
+≅-sym G₁ G₂
+    record { from = φ; to = φ⁻¹; inverse = (ff⁻¹=id , f⁻¹f=id) } =
+    record { from = φ⁻¹; to = φ; inverse = (f⁻¹f=id , ff⁻¹=id) }
+
 Group-ℤ : Group
 Group-ℤ = record
     { G = Int.ℤ
