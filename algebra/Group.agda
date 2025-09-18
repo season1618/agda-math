@@ -111,6 +111,8 @@ record AbelGroup : Set₁ where
         *-comm : ∀ (x y : Group.G G) → (Group._*_ G) x y ≡ (Group._*_ G) y x
 
 record Hom (G₁ G₂ : Group) : Set₁ where
+    S₁ = Group.G G₁
+    S₂ = Group.G G₂
     _*₁_ = Group._*_ G₁
     _*₂_ = Group._*_ G₂
     e₁ = Group.e G₁
@@ -119,37 +121,37 @@ record Hom (G₁ G₂ : Group) : Set₁ where
     /₂ = Group./ G₂
 
     field
-        hom : Group.G G₁ → Group.G G₂
-        *-hom : ∀ (x y : Group.G G₁) → hom (x *₁ y) ≡ hom x *₂ hom y
+        fun : S₁ → S₂
+        *-preserve : ∀ (x y : S₁) → fun (x *₁ y) ≡ fun x *₂ fun y
 
-    identity-preserve : hom e₁ ≡ e₂
-    identity-preserve = Group.reductionL G₂ (hom e₁) (hom e₁) e₂ lemma where
-        lemma : hom e₁ *₂ hom e₁ ≡ hom e₁ *₂ e₂
+    identity-preserve : fun e₁ ≡ e₂
+    identity-preserve = Group.reductionL G₂ (fun e₁) (fun e₁) e₂ lemma where
+        lemma : fun e₁ *₂ fun e₁ ≡ fun e₁ *₂ e₂
         lemma =
             begin
-                hom e₁ *₂ hom e₁
-            ≡⟨ sym (*-hom e₁ e₁) ⟩
-                hom (e₁ *₁ e₁)
-            ≡⟨ cong hom (Group.*-identityL G₁ e₁) ⟩
-                hom e₁
-            ≡⟨ sym (Group.*-identityR G₂ (hom e₁)) ⟩
-                hom e₁ *₂ e₂
+                fun e₁ *₂ fun e₁
+            ≡⟨ sym (*-preserve e₁ e₁) ⟩
+                fun (e₁ *₁ e₁)
+            ≡⟨ cong fun (Group.*-identityL G₁ e₁) ⟩
+                fun e₁
+            ≡⟨ sym (Group.*-identityR G₂ (fun e₁)) ⟩
+                fun e₁ *₂ e₂
             ∎
 
-    inverse-preserve : ∀ (x : Group.G G₁) → hom (/₁ x) ≡ /₂ (hom x)
-    inverse-preserve x = Group.reductionL G₂ (hom x) (hom (/₁ x)) (/₂ (hom x)) lemma where
-        lemma : hom x *₂ hom (/₁ x) ≡ hom x *₂ /₂ (hom x)
+    inverse-preserve : ∀ (x : S₁) → fun (/₁ x) ≡ /₂ (fun x)
+    inverse-preserve x = Group.reductionL G₂ (fun x) (fun (/₁ x)) (/₂ (fun x)) lemma where
+        lemma : fun x *₂ fun (/₁ x) ≡ fun x *₂ /₂ (fun x)
         lemma =
             begin
-                hom x *₂ hom (/₁ x)
-            ≡⟨ sym (*-hom x (/₁ x)) ⟩
-                hom (x *₁ /₁ x)
-            ≡⟨ cong hom (Group.*-inverseR G₁ x) ⟩
-                hom e₁
+                fun x *₂ fun (/₁ x)
+            ≡⟨ sym (*-preserve x (/₁ x)) ⟩
+                fun (x *₁ /₁ x)
+            ≡⟨ cong fun (Group.*-inverseR G₁ x) ⟩
+                fun e₁
             ≡⟨ identity-preserve ⟩
                 e₂
-            ≡⟨ sym (Group.*-inverseR G₂ (hom x)) ⟩
-                hom x *₂ /₂ (hom x)
+            ≡⟨ sym (Group.*-inverseR G₂ (fun x)) ⟩
+                fun x *₂ /₂ (fun x)
             ∎
 
     Ker : Group
@@ -159,25 +161,25 @@ record Hom (G₁ G₂ : Group) : Set₁ where
         ; e = e'
         ; / = /'
 
-        ; *-assoc = \x y z → cong-spec ((x *' y) *' z) (x *' (y *' z)) (Group.*-assoc G₁ (Spec.x x) (Spec.x y) (Spec.x z))
-        ; *-identityL = \x → cong-spec (e' *' x) x (Group.*-identityL G₁ (Spec.x x))
-        ; *-identityR = \x → cong-spec (x *' e') x (Group.*-identityR G₁ (Spec.x x))
-        ; *-inverseL = \x → cong-spec (/' x *' x) e' (Group.*-inverseL G₁ (Spec.x x))
-        ; *-inverseR = \x → cong-spec (x *' /' x) e' (Group.*-inverseR G₁ (Spec.x x))
+        ; *-assoc = \x y z → cong-spec ((x *' y) *' z) (x *' (y *' z)) (Group.*-assoc G₁ (Spec.elem x) (Spec.elem y) (Spec.elem z))
+        ; *-identityL = \x → cong-spec (e' *' x) x (Group.*-identityL G₁ (Spec.elem x))
+        ; *-identityR = \x → cong-spec (x *' e') x (Group.*-identityR G₁ (Spec.elem x))
+        ; *-inverseL = \x → cong-spec (/' x *' x) e' (Group.*-inverseL G₁ (Spec.elem x))
+        ; *-inverseR = \x → cong-spec (x *' /' x) e' (Group.*-inverseR G₁ (Spec.elem x))
         } where
             SetKer : Set
-            SetKer = Spec (Group.G G₁) (\x → hom x ≡ e₂)
+            SetKer = Spec S₁ (\x → fun x ≡ e₂)
 
             _*'_ : SetKer → SetKer → SetKer
             _*'_ ⟨ x , fx=e ⟩ ⟨ y , fy=e ⟩ = ⟨ x *₁ y , fxy=e ⟩ where
-                .fxy=e : hom (x *₁ y) ≡ e₂
+                .fxy=e : fun (x *₁ y) ≡ e₂
                 fxy=e =
                     begin
-                        hom (x *₁ y)
-                    ≡⟨ *-hom x y ⟩
-                        hom x *₂ hom y
-                    ≡⟨ cong (_*₂ hom y) (irrAx fx=e) ⟩
-                        e₂ *₂ hom y
+                        fun (x *₁ y)
+                    ≡⟨ *-preserve x y ⟩
+                        fun x *₂ fun y
+                    ≡⟨ cong (_*₂ fun y) (irrAx fx=e) ⟩
+                        e₂ *₂ fun y
                     ≡⟨ cong (e₂ *₂_) (irrAx fy=e) ⟩
                         e₂ *₂ e₂
                     ≡⟨ Group.*-identityL G₂ e₂ ⟩
@@ -189,18 +191,18 @@ record Hom (G₁ G₂ : Group) : Set₁ where
 
             /' : SetKer → SetKer
             /' ⟨ x , fx=e ⟩ = ⟨ /₁ x , fx⁻¹=e ⟩ where
-                .fx⁻¹=e : hom (/₁ x) ≡ e₂
+                .fx⁻¹=e : fun (/₁ x) ≡ e₂
                 fx⁻¹=e =
                     begin
-                        hom (/₁ x)
-                    ≡⟨ sym (Group.*-identityL G₂ (hom (/₁ x))) ⟩
-                        e₂ *₂ hom (/₁ x)
-                    ≡⟨ sym (cong (_*₂ hom (/₁ x)) (irrAx fx=e)) ⟩
-                        hom x *₂ hom (/₁ x)
-                    ≡⟨ sym (*-hom x (/₁ x)) ⟩
-                        hom (x *₁ (/₁ x))
-                    ≡⟨ cong hom (Group.*-inverseR G₁ x) ⟩
-                        hom e₁
+                        fun (/₁ x)
+                    ≡⟨ sym (Group.*-identityL G₂ (fun (/₁ x))) ⟩
+                        e₂ *₂ fun (/₁ x)
+                    ≡⟨ sym (cong (_*₂ fun (/₁ x)) (irrAx fx=e)) ⟩
+                        fun x *₂ fun (/₁ x)
+                    ≡⟨ sym (*-preserve x (/₁ x)) ⟩
+                        fun (x *₁ (/₁ x))
+                    ≡⟨ cong fun (Group.*-inverseR G₁ x) ⟩
+                        fun e₁
                     ≡⟨ identity-preserve ⟩
                         e₂
                     ∎
@@ -209,7 +211,7 @@ record _≅_ (G₁ G₂ : Group) : Set₁ where
     field
         from : Hom G₁ G₂
         to   : Hom G₂ G₁
-        inverse : let f = Hom.hom from in let g = Hom.hom to in (f ∘ g ≡ id) × (g ∘ f ≡ id)
+        inverse : let f = Hom.fun from in let g = Hom.fun to in (f ∘ g ≡ id) × (g ∘ f ≡ id)
 
 Group-ℤ : Group
 Group-ℤ = record
@@ -234,8 +236,8 @@ AbelGroup-ℤ = record
 twice : Int.ℤ → Int.ℤ
 twice = Int._*_ (Int.+ 2)
 
-twice-hom : Hom Group-ℤ Group-ℤ
-twice-hom = record
-    { hom = twice
-    ; *-hom = Int.*-distribˡ-+ (Int.+ 2)
+twice-fun : Hom Group-ℤ Group-ℤ
+twice-fun = record
+    { fun = twice
+    ; *-preserve = Int.*-distribˡ-+ (Int.+ 2)
     }
