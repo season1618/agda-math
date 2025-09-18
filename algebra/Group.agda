@@ -2,7 +2,7 @@ import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; cong; sym)
 open Eq.≡-Reasoning using (begin_; step-≡-∣; step-≡-⟩; _∎)
 open import Function.Base using (_∘_; id)
-open import Data.Product using (_,_; _×_; proj₁; proj₂)
+open import Data.Product using (_,_; ∃-syntax; _×_; proj₁; proj₂)
 import Data.Integer.Base as Int using (ℤ; +_; +0; _+_; -_; _*_)
 import Data.Integer.Properties as Int using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm; *-distribˡ-+)
 
@@ -276,6 +276,38 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                         /₂ e₂ 
                     ≡⟨ Group.inverse-identity G₂ ⟩
                         e₂
+                    ∎
+    
+    ImSubgroup : Subgroup G₂
+    ImSubgroup = record
+        { P = \x → ∃[ y ] fun y ≡ x
+        ; *-closure = *-closure'
+        ; *-identity = (e₁ , identity-preserve)
+        ; *-inverse = *-inverse'
+        } where
+            .*-closure' : ∀ (x y : S₂) → ∃[ x' ] fun x' ≡ x → ∃[ y' ] fun y' ≡ y → ∃[ xy' ] fun xy' ≡ x *₂ y
+            *-closure' x y (x' , fx'=x) (y' , fy'=y) = (x' *₁ y' , fxy'=xy) where
+                .fxy'=xy : fun (x' *₁ y') ≡ x *₂ y
+                fxy'=xy =
+                    begin
+                        fun (x' *₁ y')
+                    ≡⟨ *-preserve x' y' ⟩
+                        fun x' *₂ fun y'
+                    ≡⟨ cong (_*₂ fun y') (irrAx fx'=x) ⟩
+                        x *₂ fun y'
+                    ≡⟨ cong (x *₂_) (irrAx fy'=y) ⟩
+                        x *₂ y
+                    ∎
+            .*-inverse' : ∀ (x : S₂) → ∃[ x' ] fun x' ≡ x → ∃[ /x' ] fun /x' ≡ /₂ x
+            *-inverse' x (x' , fx'=x) = (/₁ x' , fx⁻¹'=x⁻¹) where
+                .fx⁻¹'=x⁻¹ : fun (/₁ x') ≡ /₂ x
+                fx⁻¹'=x⁻¹ =
+                    begin
+                        fun (/₁ x')
+                    ≡⟨ inverse-preserve x' ⟩
+                        /₂ (fun x')
+                    ≡⟨ cong /₂ (irrAx fx'=x) ⟩
+                        /₂ x
                     ∎
 
 record _≅_ (G₁ G₂ : Group) : Set₁ where
