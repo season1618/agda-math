@@ -1,5 +1,6 @@
+open import Relation.Binary using (Rel; Reflexive; Symmetric; Transitive; IsEquivalence)
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl; cong; sym)
+open Eq using (_≡_; refl; cong; sym; subst)
 open Eq.≡-Reasoning using (begin_; step-≡-∣; step-≡-⟩; _∎)
 open import Function.Base using (_∘_; id)
 open import Data.Product using (_,_; ∃-syntax; _×_; proj₁; proj₂)
@@ -7,6 +8,7 @@ import Data.Integer.Base as Int using (ℤ; +_; +0; _+_; -_; _*_)
 import Data.Integer.Properties as Int using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm; *-distribˡ-+)
 
 open import Irrelevance using (irrAx; Spec; ⟨_,_⟩; cong-spec)
+open import Set using ()
 
 record Group : Set₁ where
     field
@@ -65,9 +67,6 @@ record Group : Set₁ where
             y₂
         ∎
 
-    inverse-identity : / e ≡ e
-    inverse-identity = inverse-unique e (/ e) e (*-inverseL e , *-inverseR e) (*-identityL e , *-identityR e)
-
     reductionL : ∀ (x y z : G) → x * y ≡ x * z → y ≡ z
     reductionL x y z xy=xz =
         begin
@@ -107,6 +106,41 @@ record Group : Set₁ where
         ≡⟨ *-identityR z ⟩
             z
         ∎
+
+    inverse-product : ∀ (x y : G) → / (x * y) ≡ / y * / x
+    inverse-product x y = reductionL (x * y) (/ (x * y)) (/ y * / x) lemma where
+        lemma : (x * y) * (/ (x * y)) ≡ (x * y) * (/ y * / x)
+        lemma =
+            begin
+                (x * y) * / (x * y)
+            ≡⟨ *-inverseR (x * y) ⟩
+                e
+            ≡⟨ sym (*-inverseR x) ⟩
+                x * / x
+            ≡⟨ cong (_* (/ x)) (sym (*-identityR x)) ⟩
+                (x * e) * / x
+            ≡⟨ cong (\t → (x * t) * / x) (sym (*-inverseR y)) ⟩
+                (x * (y * / y)) * / x
+            ≡⟨ cong (_* / x) (sym (*-assoc x y (/ y))) ⟩
+                ((x * y) * / y) * / x
+            ≡⟨ *-assoc (x * y) (/ y) (/ x) ⟩
+                (x * y) * (/ y * / x)
+            ∎
+    
+    inverse-identity : / e ≡ e
+    inverse-identity = inverse-unique e (/ e) e (*-inverseL e , *-inverseR e) (*-identityL e , *-identityR e)
+
+    inverse-inverse : ∀ (x : G) → / (/ x) ≡ x
+    inverse-inverse x = reductionL (/ x) (/ (/ x)) x x⁻¹x⁻¹⁻¹=x⁻¹x where
+        x⁻¹x⁻¹⁻¹=x⁻¹x : / x * / (/ x) ≡ / x * x
+        x⁻¹x⁻¹⁻¹=x⁻¹x =
+            begin
+                / x * / (/ x)
+            ≡⟨ *-inverseR (/ x) ⟩
+                e
+            ≡⟨ sym (*-inverseL x) ⟩
+                / x * x
+            ∎
 
 record AbelGroup : Set₁ where
     field
@@ -149,6 +183,58 @@ record Subgroup (G : Group) : Set₁ where
 
             /' : T → T
             /' ⟨ x , px ⟩ = ⟨ / x , *-inverse x px ⟩
+
+Quotient : (G : Group) (H : Subgroup G) → Set₁
+Quotient G H = Set.Quotient S Eqv
+    where
+        S = Group.G G
+        P = Subgroup.P H
+        _*_ = Group._*_ G
+        e = Group.e G
+        / = Group./ G
+
+        data _~_ : S → S → Set where
+            evid : (x y : S) → P (/ x * y) → x ~ y
+
+        ~-refl : Reflexive _~_
+        ~-refl {x} = evid x x (subst P (sym (Group.*-inverseL G x)) (Subgroup.*-identity H))
+
+        ~-sym : Symmetric _~_
+        ~-sym {x} {y} (evid x y x~y) = evid y x (subst P /x⁻¹y=y⁻¹x (Subgroup.*-inverse H (/ x * y) x~y)) where
+            /x⁻¹y=y⁻¹x : / (/ x * y) ≡ / y * x
+            /x⁻¹y=y⁻¹x =
+                begin
+                    / (/ x * y)
+                ≡⟨ Group.inverse-product G (/ x) y ⟩
+                    / y * / (/ x)
+                ≡⟨ cong (/ y *_) (Group.inverse-inverse G x) ⟩
+                    / y * x
+                ∎
+
+        ~-trans : Transitive _~_
+        ~-trans {x} {y} {z} (evid x y x~y) (evid y z y~z) = evid x z (subst P x⁻¹yy⁻¹z=x⁻¹z (Subgroup.*-closure H (/ x * y) (/ y * z) x~y y~z)) where
+            x⁻¹yy⁻¹z=x⁻¹z : (/ x * y) * (/ y * z) ≡ / x * z
+            x⁻¹yy⁻¹z=x⁻¹z =
+                begin
+                    (/ x * y) * (/ y * z)
+                ≡⟨ Group.*-assoc G (/ x) y (/ y * z) ⟩
+                    / x * (y * (/ y * z))
+                ≡⟨ cong (/ x *_) (sym (Group.*-assoc G y (/ y) z)) ⟩
+                    / x * ((y * / y) * z)
+                ≡⟨ cong (\t → / x * (t * z)) (Group.*-inverseR G y) ⟩
+                    / x * (e * z)
+                ≡⟨ cong (/ x *_) (Group.*-identityL G z) ⟩
+                    / x * z
+                ∎
+
+        Eqv = record
+            { R = _~_
+            ; is_equiv = record
+                { refl = ~-refl
+                ; sym = ~-sym
+                ; trans = ~-trans
+                }
+            }
 
 record Hom (G₁ G₂ : Group) : Set₁ where
     S₁ = Group.G G₁
