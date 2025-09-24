@@ -121,9 +121,9 @@ record Subgroup (G : Group) : Set₁ where
 
     field
         P : S → Set
-        .*-closure : ∀ (x y : S) → P x → P y → P (x * y)
+        *-closure : ∀ (x y : S) → P x → P y → P (x * y)
         *-identity : P e
-        .*-inverse : ∀ (x : S) → P x → P (/ x)
+        *-inverse : ∀ (x : S) → P x → P (/ x)
 
     group : Group
     group = record
@@ -201,9 +201,9 @@ record Hom (G₁ G₂ : Group) : Set₁ where
         ; *-identity = identity-preserve
         ; *-inverse = *-inverse'
         } where
-            .*-closure' : ∀ (x y : S₁) → fun x ≡ e₂ → fun y ≡ e₂ → fun (x *₁ y) ≡ e₂
+            *-closure' : ∀ (x y : S₁) → fun x ≡ e₂ → fun y ≡ e₂ → fun (x *₁ y) ≡ e₂
             *-closure' x y fx=e fy=e = fxy=e where
-                .fxy=e : fun (x *₁ y) ≡ e₂
+                fxy=e : fun (x *₁ y) ≡ e₂
                 fxy=e =
                     begin
                         fun (x *₁ y)
@@ -216,9 +216,9 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                     ≡⟨ Group.*-identityL G₂ e₂ ⟩
                         e₂
                     ∎
-            .*-inverse' : ∀ (x : S₁) → fun x ≡ e₂ → fun (/₁ x) ≡ e₂
+            *-inverse' : ∀ (x : S₁) → fun x ≡ e₂ → fun (/₁ x) ≡ e₂
             *-inverse' x fx=e = fx⁻¹=e where
-                .fx⁻¹=e : fun (/₁ x) ≡ e₂
+                fx⁻¹=e : fun (/₁ x) ≡ e₂
                 fx⁻¹=e =
                     begin
                         fun (/₁ x)
@@ -285,9 +285,9 @@ record Hom (G₁ G₂ : Group) : Set₁ where
         ; *-identity = (e₁ , identity-preserve)
         ; *-inverse = *-inverse'
         } where
-            .*-closure' : ∀ (x y : S₂) → ∃[ x' ] fun x' ≡ x → ∃[ y' ] fun y' ≡ y → ∃[ xy' ] fun xy' ≡ x *₂ y
+            *-closure' : ∀ (x y : S₂) → ∃[ x' ] fun x' ≡ x → ∃[ y' ] fun y' ≡ y → ∃[ xy' ] fun xy' ≡ x *₂ y
             *-closure' x y (x' , fx'=x) (y' , fy'=y) = (x' *₁ y' , fxy'=xy) where
-                .fxy'=xy : fun (x' *₁ y') ≡ x *₂ y
+                fxy'=xy : fun (x' *₁ y') ≡ x *₂ y
                 fxy'=xy =
                     begin
                         fun (x' *₁ y')
@@ -298,9 +298,9 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                     ≡⟨ cong (x *₂_) fy'=y ⟩
                         x *₂ y
                     ∎
-            .*-inverse' : ∀ (x : S₂) → ∃[ x' ] fun x' ≡ x → ∃[ /x' ] fun /x' ≡ /₂ x
+            *-inverse' : ∀ (x : S₂) → ∃[ x' ] fun x' ≡ x → ∃[ /x' ] fun /x' ≡ /₂ x
             *-inverse' x (x' , fx'=x) = (/₁ x' , fx⁻¹'=x⁻¹) where
-                .fx⁻¹'=x⁻¹ : fun (/₁ x') ≡ /₂ x
+                fx⁻¹'=x⁻¹ : fun (/₁ x') ≡ /₂ x
                 fx⁻¹'=x⁻¹ =
                     begin
                         fun (/₁ x')
