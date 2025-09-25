@@ -12,5 +12,5 @@ record Spec (A : Set) (P : A -> Set) : Set where
         elem : A
         .certificate : P elem
 
-cong-spec : {A : Set} {P : A → Set} → (x y : Spec A P) → Spec.elem x ≡ Spec.elem y → x ≡ y
-cong-spec _ _ refl = refl
+cong-spec : {A : Set} {P : A → Set} → {x y : Spec A P} → Spec.elem x ≡ Spec.elem y → x ≡ y
+cong-spec refl = refl

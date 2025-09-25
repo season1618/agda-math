@@ -166,11 +166,11 @@ record Subgroup (G : Group) : Set₁ where
         ; e = e'
         ; / = /'
 
-        ; *-assoc = \x y z → cong-spec ((x *' y) *' z) (x *' (y *' z)) (Group.*-assoc G (Spec.elem x) (Spec.elem y) (Spec.elem z))
-        ; *-identityL = \x → cong-spec (e' *' x) x (Group.*-identityL G (Spec.elem x))
-        ; *-identityR = \x → cong-spec (x *' e') x (Group.*-identityR G (Spec.elem x))
-        ; *-inverseL = \x → cong-spec (/' x *' x) e' (Group.*-inverseL G (Spec.elem x))
-        ; *-inverseR = \x → cong-spec (x *' /' x) e' (Group.*-inverseR G (Spec.elem x))
+        ; *-assoc = \x y z → cong-spec (Group.*-assoc G (Spec.elem x) (Spec.elem y) (Spec.elem z))
+        ; *-identityL = \x → cong-spec (Group.*-identityL G (Spec.elem x))
+        ; *-identityR = \x → cong-spec (Group.*-identityR G (Spec.elem x))
+        ; *-inverseL = \x → cong-spec (Group.*-inverseL G (Spec.elem x))
+        ; *-inverseR = \x → cong-spec (Group.*-inverseR G (Spec.elem x))
         } where
             T : Set
             T = Spec S P
@@ -322,11 +322,11 @@ record Hom (G₁ G₂ : Group) : Set₁ where
         ; e = e'
         ; / = /'
 
-        ; *-assoc = \x y z → cong-spec ((x *' y) *' z) (x *' (y *' z)) (Group.*-assoc G₁ (Spec.elem x) (Spec.elem y) (Spec.elem z))
-        ; *-identityL = \x → cong-spec (e' *' x) x (Group.*-identityL G₁ (Spec.elem x))
-        ; *-identityR = \x → cong-spec (x *' e') x (Group.*-identityR G₁ (Spec.elem x))
-        ; *-inverseL = \x → cong-spec (/' x *' x) e' (Group.*-inverseL G₁ (Spec.elem x))
-        ; *-inverseR = \x → cong-spec (x *' /' x) e' (Group.*-inverseR G₁ (Spec.elem x))
+        ; *-assoc = \x y z → cong-spec (Group.*-assoc G₁ (Spec.elem x) (Spec.elem y) (Spec.elem z))
+        ; *-identityL = \x → cong-spec (Group.*-identityL G₁ (Spec.elem x))
+        ; *-identityR = \x → cong-spec (Group.*-identityR G₁ (Spec.elem x))
+        ; *-inverseL = \x → cong-spec (Group.*-inverseL G₁ (Spec.elem x))
+        ; *-inverseR = \x → cong-spec (Group.*-inverseR G₁ (Spec.elem x))
         } where
             SetKer : Set
             SetKer = Spec S₁ (\x → fun x ≡ e₂)
