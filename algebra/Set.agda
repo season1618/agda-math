@@ -13,8 +13,8 @@ record Subset (S : Set) : Set₁ where
     field
         P : S → Set
 
-    subset : Set
-    subset = Spec S P
+    set : Set
+    set = Spec S P
 
 open Subset
 
@@ -67,12 +67,23 @@ record EquivRel (S : Set) : Set₁ where
 
 record Quotient (S : Set) (Eqv : EquivRel S) : Set₁ where
     _~_ = EquivRel.R Eqv
+    is_equiv = EquivRel.is_equiv Eqv
+    ~-refl = IsEquivalence.refl is_equiv
+    ~-sym = IsEquivalence.sym is_equiv
+    ~-trans = IsEquivalence.trans is_equiv
 
     field
         C : Subset S
 
-        complete : ∀ (x : S) → Σ[ c ∈ subset C ] (x ~ elem c)
-        disjoint : ∀ (x y : subset C) → elem x ~ elem y → x ≡ y
+        complete : ∀ (x : S) → Σ[ c ∈ set C ] (elem c ~ x)
+        disjoint : ∀ (x y : set C) → elem x ~ elem y → x ≡ y
 
-proj : ∀ {S : Set} {~ : EquivRel S} (S/~ : Quotient S ~) → S → subset (Quotient.C S/~)
+    x~y→[x]=[y] : ∀ (x y : S) → x ~ y → proj₁ (complete x) ≡ proj₁ (complete y)
+    x~y→[x]=[y] x y x~y =
+        let c1 , c1~x = complete x
+            c2 , c2~y = complete y
+            c1~c2 = ~-trans (~-trans c1~x x~y) (~-sym c2~y) -- elem c1 ~ elem c2
+        in disjoint c1 c2 c1~c2
+
+proj : ∀ {S : Set} {_~_ : EquivRel S} (S/~ : Quotient S _~_) → S → set (Quotient.C S/~)
 proj S/~ x = proj₁ (Quotient.complete S/~ x)
