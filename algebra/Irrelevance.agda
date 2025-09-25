@@ -6,6 +6,12 @@ open Eq using (_≡_; refl)
 postulate
     .irrAx : ∀ {l} {A : Set l} -> .A -> A
 
+record IrrProduct (A B : Set) : Set where
+    constructor _,_
+    field
+        fst : A
+        .snd : B
+
 record Spec (A : Set) (P : A -> Set) : Set where
     constructor ⟨_,_⟩
     field
