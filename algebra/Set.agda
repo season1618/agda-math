@@ -6,8 +6,17 @@ open Eq using (_≡_; refl; cong; sym; trans)
 open Eq.≡-Reasoning using (begin_; step-≡-∣; step-≡-⟩; _∎)
 open import Function.Base using (_∘_; id)
 
-open import Irrelevance using (Spec)
+-- specification
+record Spec (A : Set) (P : A -> Set) : Set where
+    constructor ⟨_,_⟩
+    field
+        elem : A
+        .certificate : P elem
+
 open Spec
+
+cong-spec : {A : Set} {P : A → Set} → {x y : Spec A P} → Spec.elem x ≡ Spec.elem y → x ≡ y
+cong-spec refl = refl
 
 record Subset (S : Set) : Set₁ where
     field

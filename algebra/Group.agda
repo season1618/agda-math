@@ -7,8 +7,8 @@ open import Data.Product using (_,_; ∃-syntax; _×_; proj₁; proj₂)
 import Data.Integer.Base as Int using (ℤ; +_; +0; _+_; -_; _*_)
 import Data.Integer.Properties as Int using (+-assoc; +-identityˡ; +-identityʳ; +-inverseˡ; +-inverseʳ; +-comm; *-distribˡ-+)
 
-open import Irrelevance using (irrAx; IrrProduct; _,_; Spec; ⟨_,_⟩; cong-spec)
-open import Set using (Subset)
+open import Irrelevance using (irrAx; IrrProduct; _,_)
+open import Set using (Spec; ⟨_,_⟩; cong-spec; Subset)
 
 postulate
     funExt : {A B : Set} {f g : A → B} → (∀ (x : A) → f x ≡ g x) → f ≡ g
