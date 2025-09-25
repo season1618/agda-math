@@ -110,6 +110,30 @@ record Group : Set₁ where
             z
         ∎
 
+    x⁻¹xy=y : ∀ (x y : G) → / x * (x * y) ≡ y
+    x⁻¹xy=y x y =
+        begin
+            / x * (x * y)
+        ≡⟨ sym (*-assoc (/ x) x y) ⟩
+            (/ x * x) * y
+        ≡⟨ cong (_* y) (*-inverseL x) ⟩
+            e * y
+        ≡⟨ *-identityL y ⟩
+            y
+        ∎
+
+    xx⁻¹y=y : ∀ (x y : G) → x * (/ x * y) ≡ y
+    xx⁻¹y=y x y =
+        begin
+            x * (/ x * y)
+        ≡⟨ sym (*-assoc x (/ x) y) ⟩
+            (x * / x) * y
+        ≡⟨ cong (_* y) (*-inverseR x) ⟩
+            e * y
+        ≡⟨ *-identityL y ⟩
+            y
+        ∎
+
     inverse-product : ∀ (x y : G) → / (x * y) ≡ / y * / x
     inverse-product x y = reductionL (x * y) (/ (x * y)) (/ y * / x) lemma where
         lemma : (x * y) * (/ (x * y)) ≡ (x * y) * (/ y * / x)
@@ -236,18 +260,7 @@ module EquivBySubgroup (G : Group) (H : Subgroup G) where
             ∎
 
     g~gh : ∀ (g : S) → (h : Subgroup.set H) → g ~ (g * Spec.elem h)
-    g~gh g ⟨ h , Ph ⟩ = evid g (g * h) (subst P (sym /ggh=h) Ph) where
-        /ggh=h : / g * (g * h) ≡ h
-        /ggh=h =
-            begin
-                / g * (g * h)
-            ≡⟨ sym (Group.*-assoc G (/ g) g h) ⟩
-                (/ g * g) * h
-            ≡⟨ cong (_* h) (Group.*-inverseL G g) ⟩
-                e * h
-            ≡⟨ Group.*-identityL G h ⟩
-                h
-            ∎
+    g~gh g ⟨ h , Ph ⟩ = evid g (g * h) (subst P (sym (Group.x⁻¹xy=y G g h)) Ph)
 
     Quotient : Set₁
     Quotient = Set.Quotient S Eqv
@@ -283,49 +296,17 @@ module EquivBySubgroup (G : Group) (H : Subgroup G) where
             to' : T × U → S
             to' ( ⟨ h , h∈T ⟩ , ⟨ c , c∈U ⟩ ) = c * h
 
-            /cch=h : ∀ (c h : S) → / c * (c * h) ≡ h
-            /cch=h c h =
-                begin
-                    / c * (c * h)
-                ≡⟨ sym (Group.*-assoc G (/ c) c h) ⟩
-                    (/ c * c) * h
-                ≡⟨ cong (_* h) (Group.*-inverseL G c) ⟩
-                    e * h
-                ≡⟨ Group.*-identityL G h ⟩
-                    h
-                ∎
-            
-            c/ch=h : ∀ (c h : S) → c * (/ c * h) ≡ h
-            c/ch=h c h =
-                begin
-                    c * (/ c * h)
-                ≡⟨ sym (Group.*-assoc G c (/ c) h) ⟩
-                    (c * / c) * h
-                ≡⟨ cong (_* h) (Group.*-inverseR G c) ⟩
-                    e * h
-                ≡⟨ Group.*-identityL G h ⟩
-                    h
-                ∎
-
             fromtox=x : ∀ (x : T × U) → (from' ∘ to') x ≡ x
             fromtox=x ( ⟨ h , h∈T ⟩ , ⟨ c , c∈U ⟩ ) =
                 let [ch]=[c] = Set.Quotient.x~c→[x]=[c] G/H (c * h) ⟨ c , c∈U ⟩ (~-sym (g~gh c ⟨ h , h∈T ⟩))
-                in begin
-                    (from' ∘ to') ( ⟨ h , h∈T ⟩ , ⟨ c , c∈U ⟩ )
-                ≡⟨ cong₂ _,_
-                    (cong-spec (trans (cong (\t → / (Spec.elem t) * (c * h)) [ch]=[c]) (/cch=h c h)))
-                    [ch]=[c] ⟩
-                    ( ⟨ h , h∈T ⟩ , ⟨ c , c∈U ⟩ )
-                ∎
+                in cong₂ _,_
+                    (cong-spec (trans (cong (\t → / (Spec.elem t) * (c * h)) [ch]=[c]) (Group.x⁻¹xy=y G c h)))
+                    [ch]=[c]
 
             tofromx=x : ∀ (x : S) → (to' ∘ from') x ≡ x
             tofromx=x g =
                 let c = Spec.elem (proj₁ (Set.Quotient.complete G/H g))
-                in begin
-                    (to' ∘ from') g
-                ≡⟨ c/ch=h c g ⟩
-                    g
-                ∎
+                in Group.xx⁻¹y=y G c g
 
             from∘to=id : from' ∘ to' ≡ id
             from∘to=id = funExt fromtox=x
