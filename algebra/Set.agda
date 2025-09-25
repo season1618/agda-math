@@ -2,7 +2,7 @@ open import Agda.Primitive
 open import Data.Product using (Σ; _,_; Σ-syntax; ∃-syntax; _×_; proj₁)
 open import Relation.Binary using (Rel; IsEquivalence)
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl; cong; sym)
+open Eq using (_≡_; refl; cong; sym; trans)
 open Eq.≡-Reasoning using (begin_; step-≡-∣; step-≡-⟩; _∎)
 open import Function.Base using (_∘_; id)
 
@@ -78,12 +78,20 @@ record Quotient (S : Set) (Eqv : EquivRel S) : Set₁ where
         complete : ∀ (x : S) → Σ[ c ∈ set C ] (elem c ~ x)
         disjoint : ∀ (x y : set C) → elem x ~ elem y → x ≡ y
 
+    c∈[c] : ∀ (c : set C) → proj₁ (complete (elem c)) ≡ c
+    c∈[c] c =
+        let c' , c'~c = complete (elem c)
+        in disjoint c' c c'~c
+
     x~y→[x]=[y] : ∀ (x y : S) → x ~ y → proj₁ (complete x) ≡ proj₁ (complete y)
     x~y→[x]=[y] x y x~y =
         let c1 , c1~x = complete x
             c2 , c2~y = complete y
             c1~c2 = ~-trans (~-trans c1~x x~y) (~-sym c2~y) -- elem c1 ~ elem c2
         in disjoint c1 c2 c1~c2
+
+    x~c→[x]=[c] : ∀ (x : S) (c : set C) → x ~ elem c → proj₁ (complete x) ≡ c
+    x~c→[x]=[c] x c x~c = trans (x~y→[x]=[y] x (elem c) x~c) (c∈[c] c)
 
 proj : ∀ {S : Set} {_~_ : EquivRel S} (S/~ : Quotient S _~_) → S → set (Quotient.C S/~)
 proj S/~ x = proj₁ (Quotient.complete S/~ x)
