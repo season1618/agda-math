@@ -224,6 +224,14 @@ record NormalSubgroup (G : Group) : Set₁ where
         *-identity : P e
         *-inverse : ∀ (x : S) → P x → P (/ x)
         *-normal : ∀ (g h : S) → P h → P ((g * h) * / g)
+    
+    subgroup : Subgroup G
+    subgroup = record
+        { P = P
+        ; *-closure = *-closure
+        ; *-identity = *-identity
+        ; *-inverse = *-inverse
+        }
 
 module EquivBySubgroup (G : Group) (H : Subgroup G) where
     private
@@ -269,6 +277,37 @@ module EquivBySubgroup (G : Group) (H : Subgroup G) where
             ≡⟨ cong (/ x *_) (Group.*-identityL G z) ⟩
                 / x * z
             ∎
+    
+    ~-substL : (x y z : S) → x ~ y → x ≡ z → z ~ y
+    ~-substL x y z (evid x y x~y) x=z = evid z y z~y where
+        .z~y : P (/ z * y)
+        z~y = subst P (cong (\t → / t * y) x=z) (irrAx x~y)
+
+    ~-substR : (x y z : S) → x ~ y → y ≡ z → x ~ z
+    ~-substR x y z (evid x y x~y) y=z = evid x z x~z where
+        .x~z : P (/ x * z)
+        x~z = subst P (cong (/ x *_) y=z) (irrAx x~y)
+
+    x~y→zx~zy : ∀ (x y z : S) → x ~ y → (z * x) ~ (z * y)
+    x~y→zx~zy x y z (evid x y x⁻¹y∈H) = evid (z * x) (z * y) x⁻¹z⁻¹zy∈H where
+        x⁻¹z⁻¹zy=x⁻¹y : / (z * x) * (z * y) ≡ / x * y
+        x⁻¹z⁻¹zy=x⁻¹y =
+            begin
+                / (z * x) * (z * y)
+            ≡⟨ cong (_* (z * y)) (Group.inverse-product G z x) ⟩
+                (/ x * / z) * (z * y)
+            ≡⟨ Group.*-assoc G (/ x) (/ z) (z * y) ⟩
+                / x * (/ z * (z * y))
+            ≡⟨ cong (/ x *_) (sym (Group.*-assoc G (/ z) z y)) ⟩
+                / x * ((/ z * z) * y)
+            ≡⟨ cong (\t → / x * (t * y)) (Group.*-inverseL G z) ⟩
+                / x * (e * y)
+            ≡⟨ cong (/ x *_) (Group.*-identityL G y) ⟩
+                / x * y
+            ∎
+
+        .x⁻¹z⁻¹zy∈H : P (/ (z * x) * (z * y))
+        x⁻¹z⁻¹zy∈H = subst P (sym x⁻¹z⁻¹zy=x⁻¹y) (irrAx x⁻¹y∈H)
 
     g~gh : ∀ (g : S) → (h : Subgroup.set H) → g ~ (g * Spec.elem h)
     g~gh g ⟨ h , Ph ⟩ = evid g (g * h) (subst P (sym (Group.x⁻¹xy=y G g h)) Ph)
@@ -324,6 +363,141 @@ module EquivBySubgroup (G : Group) (H : Subgroup G) where
 
             to∘from=id : to' ∘ from' ≡ id
             to∘from=id = funExt tofromx=x
+
+module EquivByNormalSubgroup (G : Group) (N : NormalSubgroup G) where
+    private
+        S = Group.G G
+        _*_ = Group._*_ G
+        e = Group.e G
+        / = Group./ G
+
+        H = NormalSubgroup.subgroup N
+        P = Subgroup.P H
+
+        _~_ = EquivBySubgroup._~_ G H
+
+    x~y→xz~yz : ∀ (x y z : S) → x ~ y → (x * z) ~ (y * z)
+    x~y→xz~yz x y z (EquivBySubgroup.evid x y x⁻¹y∈H) = EquivBySubgroup.evid (x * z) (y * z) z⁻¹x⁻¹yz∈H where
+        lemma : / (x * z) * (y * z) ≡ ((/ z) * (/ x * y)) * / (/ z)
+        lemma =
+            begin
+                / (x * z) * (y * z)
+            ≡⟨ cong (_* (y * z)) (Group.inverse-product G x z) ⟩
+                (/ z * / x) * (y * z)
+            ≡⟨ Group.*-assoc G (/ z) (/ x) (y * z) ⟩
+                / z * (/ x * (y * z))
+            ≡⟨ cong (/ z *_) (sym (Group.*-assoc G (/ x) y z)) ⟩
+                / z * ((/ x * y) * z)
+            ≡⟨ sym (Group.*-assoc G (/ z) (/ x * y) z) ⟩
+                (/ z * (/ x * y)) * z
+            ≡⟨ cong ((/ z * (/ x * y)) *_) (sym (Group.inverse-inverse G z)) ⟩
+                (/ z * (/ x * y)) * / (/ z)
+            ∎
+        
+        .z⁻¹x⁻¹yz∈H : P (/ (x * z) * (y * z))
+        z⁻¹x⁻¹yz∈H = subst P (sym lemma) (NormalSubgroup.*-normal N (/ z) (/ x * y) (irrAx x⁻¹y∈H))
+
+    g~hg : ∀ (g : S) → (h : Subgroup.set H) → g ~ (Spec.elem h * g)
+    g~hg g ⟨ h , h∈H ⟩ = EquivBySubgroup.evid g (h * g) g⁻¹hg∈H where
+        lemma : (/ g) * (h * g) ≡ ((/ g) * h) * / (/ g)
+        lemma =
+            begin
+                (/ g) * (h * g)
+            ≡⟨ sym (Group.*-assoc G (/ g) h g) ⟩
+                (/ g * h) * g
+            ≡⟨ cong ((/ g * h) *_) (sym (Group.inverse-inverse G g)) ⟩
+                (/ g * h) * / (/ g)
+            ∎
+
+        .g⁻¹hg∈H : P (/ g * (h * g))
+        g⁻¹hg∈H = subst P (sym lemma) (NormalSubgroup.*-normal N (/ g) h (irrAx h∈H))
+
+    QuotientGroup : (G/H : EquivBySubgroup.Quotient G H) → Group
+    QuotientGroup G/H = record
+        { G = C
+        ; _*_ = _*'_
+        ; e = e'
+        ; / = /'
+
+        ; *-assoc = *-assoc'
+        ; *-identityL = *-identityL'
+        ; *-identityR = *-identityR'
+        ; *-inverseL = *-inverseL'
+        ; *-inverseR = *-inverseR'
+        } where
+            C = Subset.set (Set.Quotient.C G/H)
+
+            _*'_ : C → C → C
+            ⟨ x , _ ⟩ *' ⟨ y , _ ⟩ = Set.proj G/H (x * y)
+
+            e' : C
+            e' = Set.proj G/H e
+
+            /' : C → C
+            /' ⟨ x , _ ⟩ = Set.proj G/H (/ x)
+
+            *-assoc' : ∀ (x y z : C) → (x *' y) *' z ≡ x *' (y *' z)
+            *-assoc' ⟨ x , px ⟩ ⟨ y , py ⟩ ⟨ z , pz ⟩ =
+                let ⟨ [xy] , _ ⟩ , [xy]~xy = Set.Quotient.complete G/H (x * y)
+                    ⟨ [[xy]z] , _ ⟩ , [[xy]z]~[xy]z = Set.Quotient.complete G/H ([xy] * z)
+                    ⟨ [yz] , _ ⟩ , [yz]~yz = Set.Quotient.complete G/H (y * z)
+                    ⟨ [x[yz]] , _ ⟩ , [x[yz]]~x[yz] = Set.Quotient.complete G/H (x * [yz])
+
+                    [xy]z~xyz = x~y→xz~yz [xy] (x * y) z [xy]~xy
+                    x[yz]~xyz = EquivBySubgroup.x~y→zx~zy G H [yz] (y * z) x [yz]~yz
+
+                    [xy]z~x[yz] = EquivBySubgroup.~-trans G H
+                        (EquivBySubgroup.~-trans G H [xy]z~xyz lemma)
+                        (EquivBySubgroup.~-sym G H x[yz]~xyz)
+
+                in Set.Quotient.x~y→[x]=[y] G/H ([xy] * z) (x * [yz]) [xy]z~x[yz] where
+                    lemma : ((x * y) * z) ~ (x * (y * z))
+                    lemma = EquivBySubgroup.evid ((x * y) * z) (x * (y * z)) lemma' where
+                        lemma' : P (/ ((x * y) * z) * (x * (y * z)))
+                        lemma' = subst P (sym lemma'') (Subgroup.*-identity H) where
+                            lemma'' : / ((x * y) * z) * (x * (y * z)) ≡ e
+                            lemma'' =
+                                begin
+                                    / ((x * y) * z) * (x * (y * z))
+                                ≡⟨ cong (\t → / t * (x * (y * z))) (Group.*-assoc G x y z) ⟩
+                                    / (x * (y * z)) * (x * (y * z))
+                                ≡⟨ Group.*-inverseL G (x * (y * z)) ⟩
+                                    e
+                                ∎
+
+            *-identityL' : ∀ (x : C) → e' *' x ≡ x
+            *-identityL' ⟨ x , x∈C ⟩ =
+                let ⟨ h , h∈C ⟩ , h~e = Set.Quotient.complete G/H e
+                    _ , h⁻¹e∈H = EquivBySubgroup.take G H h~e
+                    .h∈H : P h
+                    h∈H = subst P (Group.inverse-inverse G h) (Subgroup.*-inverse H (/ h) (subst P (Group.*-identityR G (/ h)) (irrAx h⁻¹e∈H)))
+                    x~hx = g~hg x ⟨ h , h∈H ⟩
+                in Set.Quotient.x~c→[x]=[c] G/H (h * x) ⟨ x , x∈C ⟩ (EquivBySubgroup.~-sym G H x~hx)
+
+            *-identityR' : ∀ (x : C) → x *' e' ≡ x
+            *-identityR' ⟨ x , x∈C ⟩ =
+                let ⟨ h , h∈C ⟩ , h~e = Set.Quotient.complete G/H e
+                    _ , h⁻¹e∈H = EquivBySubgroup.take G H h~e
+                    .h∈H : P h
+                    h∈H = subst P (Group.inverse-inverse G h) (Subgroup.*-inverse H (/ h) (subst P (Group.*-identityR G (/ h)) (irrAx h⁻¹e∈H)))
+                    x~xh = EquivBySubgroup.g~gh G H x ⟨ h , h∈H ⟩
+                in Set.Quotient.x~c→[x]=[c] G/H (x * h) ⟨ x , x∈C ⟩ (EquivBySubgroup.~-sym G H x~xh)
+
+            *-inverseL' : ∀ (x : C) → (/' x) *' x ≡ e'
+            *-inverseL' ⟨ x , x∈C ⟩ =
+                let ⟨ h , h∈C ⟩ , h~e = Set.Quotient.complete G/H e
+                    ⟨ [x⁻¹] , [x⁻¹]∈C ⟩ , [x⁻¹]~x⁻¹ = Set.Quotient.complete G/H (/ x)
+                    [x⁻¹]x~x⁻¹x = x~y→xz~yz [x⁻¹] (/ x) x [x⁻¹]~x⁻¹
+                    [x⁻¹]x~e = EquivBySubgroup.~-substR G H ([x⁻¹] * x) (/ x * x) e [x⁻¹]x~x⁻¹x (Group.*-inverseL G x)
+                in Set.Quotient.x~y→[x]=[y] G/H ([x⁻¹] * x) e [x⁻¹]x~e
+
+            *-inverseR' : ∀ (x : C) → x *' (/' x) ≡ e'
+            *-inverseR' ⟨ x , x∈C ⟩ =
+                let ⟨ h , h∈C ⟩ , h~e = Set.Quotient.complete G/H e
+                    ⟨ [x⁻¹] , [x⁻¹]∈C ⟩ , [x⁻¹]~x⁻¹ = Set.Quotient.complete G/H (/ x)
+                    x[x⁻¹]~xx⁻¹ = EquivBySubgroup.x~y→zx~zy G H [x⁻¹] (/ x) x [x⁻¹]~x⁻¹
+                    x[x⁻¹]~e = EquivBySubgroup.~-substR G H (x * [x⁻¹]) (x * / x) e x[x⁻¹]~xx⁻¹ (Group.*-inverseR G x)
+                in Set.Quotient.x~y→[x]=[y] G/H (x * [x⁻¹]) e x[x⁻¹]~e
 
 record Hom (G₁ G₂ : Group) : Set₁ where
     S₁ = Group.G G₁
