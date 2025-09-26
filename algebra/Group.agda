@@ -212,6 +212,19 @@ record Subgroup (G : Group) : Set₁ where
             /' : T → T
             /' ⟨ x , px ⟩ = ⟨ / x , *-inverse x px ⟩
 
+record NormalSubgroup (G : Group) : Set₁ where
+    S = Group.G G
+    _*_ = Group._*_ G
+    e = Group.e G
+    / = Group./ G
+
+    field
+        P : S → Set
+        *-closure : ∀ (x y : S) → P x → P y → P (x * y)
+        *-identity : P e
+        *-inverse : ∀ (x : S) → P x → P (/ x)
+        *-normal : ∀ (g h : S) → P h → P ((g * h) * / g)
+
 module EquivBySubgroup (G : Group) (H : Subgroup G) where
     private
         S = Group.G G
@@ -356,12 +369,13 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                 fun x *₂ /₂ (fun x)
             ∎
 
-    KerSubgroup : Subgroup G₁
-    KerSubgroup = record
+    Ker : NormalSubgroup G₁
+    Ker = record
         { P = \x → fun x ≡ e₂
         ; *-closure = *-closure'
         ; *-identity = identity-preserve
         ; *-inverse = *-inverse'
+        ; *-normal = *-normal'
         } where
             *-closure' : ∀ (x y : S₁) → fun x ≡ e₂ → fun y ≡ e₂ → fun (x *₁ y) ≡ e₂
             *-closure' x y fx=e fy=e = fxy=e where
@@ -391,57 +405,26 @@ record Hom (G₁ G₂ : Group) : Set₁ where
                     ≡⟨ Group.inverse-identity G₂ ⟩
                         e₂
                     ∎
-    Ker : Group
-    Ker = record
-        { G = SetKer
-        ; _*_ = _*'_
-        ; e = e'
-        ; / = /'
+            *-normal' : ∀ (g h : S₁) → fun h ≡ e₂ → fun ((g *₁ h) *₁ /₁ g) ≡ e₂
+            *-normal' g h fh=e =
+                begin
+                    fun ((g *₁ h) *₁ /₁ g)
+                ≡⟨ *-preserve (g *₁ h) (/₁ g) ⟩
+                    fun (g *₁ h) *₂ fun (/₁ g)
+                ≡⟨ cong (_*₂ fun (/₁ g)) (*-preserve g h) ⟩
+                    (fun g *₂ fun h) *₂ fun (/₁ g)
+                ≡⟨ cong (\t → (fun g *₂ t) *₂ fun (/₁ g)) fh=e ⟩
+                    (fun g *₂ e₂) *₂ fun (/₁ g)
+                ≡⟨ cong (_*₂ fun (/₁ g)) (Group.*-identityR G₂ (fun g)) ⟩
+                    fun g *₂ fun (/₁ g)
+                ≡⟨ cong (fun g *₂_) (inverse-preserve g) ⟩
+                    fun g *₂ /₂ (fun g)
+                ≡⟨ Group.*-inverseR G₂ (fun g) ⟩
+                    e₂
+                ∎
 
-        ; *-assoc = \x y z → cong-spec (Group.*-assoc G₁ (Spec.elem x) (Spec.elem y) (Spec.elem z))
-        ; *-identityL = \x → cong-spec (Group.*-identityL G₁ (Spec.elem x))
-        ; *-identityR = \x → cong-spec (Group.*-identityR G₁ (Spec.elem x))
-        ; *-inverseL = \x → cong-spec (Group.*-inverseL G₁ (Spec.elem x))
-        ; *-inverseR = \x → cong-spec (Group.*-inverseR G₁ (Spec.elem x))
-        } where
-            SetKer : Set
-            SetKer = Spec S₁ (\x → fun x ≡ e₂)
-
-            _*'_ : SetKer → SetKer → SetKer
-            _*'_ ⟨ x , fx=e ⟩ ⟨ y , fy=e ⟩ = ⟨ x *₁ y , fxy=e ⟩ where
-                .fxy=e : fun (x *₁ y) ≡ e₂
-                fxy=e =
-                    begin
-                        fun (x *₁ y)
-                    ≡⟨ *-preserve x y ⟩
-                        fun x *₂ fun y
-                    ≡⟨ cong (_*₂ fun y) (irrAx fx=e) ⟩
-                        e₂ *₂ fun y
-                    ≡⟨ cong (e₂ *₂_) (irrAx fy=e) ⟩
-                        e₂ *₂ e₂
-                    ≡⟨ Group.*-identityL G₂ e₂ ⟩
-                        e₂
-                    ∎
-            
-            e' : SetKer
-            e' = ⟨ e₁ , identity-preserve ⟩
-
-            /' : SetKer → SetKer
-            /' ⟨ x , fx=e ⟩ = ⟨ /₁ x , fx⁻¹=e ⟩ where
-                .fx⁻¹=e : fun (/₁ x) ≡ e₂
-                fx⁻¹=e =
-                    begin
-                        fun (/₁ x)
-                    ≡⟨ inverse-preserve x ⟩
-                        /₂ (fun x)
-                    ≡⟨ cong /₂ (irrAx fx=e) ⟩
-                        /₂ e₂ 
-                    ≡⟨ Group.inverse-identity G₂ ⟩
-                        e₂
-                    ∎
-    
-    ImSubgroup : Subgroup G₂
-    ImSubgroup = record
+    Im : Subgroup G₂
+    Im = record
         { P = \x → ∃[ y ] fun y ≡ x
         ; *-closure = *-closure'
         ; *-identity = (e₁ , identity-preserve)
