@@ -375,6 +375,11 @@ module EquivByNormalSubgroup (G : Group) (N : NormalSubgroup G) where
         P = Subgroup.P H
 
         _~_ = EquivBySubgroup._~_ G H
+        ~-sym = EquivBySubgroup.~-sym G H
+        ~-trans = EquivBySubgroup.~-trans G H
+        ~-substL = EquivBySubgroup.~-substL G H
+        ~-substR = EquivBySubgroup.~-substR G H
+        x~y→zx~zy = EquivBySubgroup.x~y→zx~zy G H
 
     x~y→xz~yz : ∀ (x y z : S) → x ~ y → (x * z) ~ (y * z)
     x~y→xz~yz x y z (EquivBySubgroup.evid x y x⁻¹y∈H) = EquivBySubgroup.evid (x * z) (y * z) z⁻¹x⁻¹yz∈H where
@@ -444,11 +449,11 @@ module EquivByNormalSubgroup (G : Group) (N : NormalSubgroup G) where
                     ⟨ [x[yz]] , _ ⟩ , [x[yz]]~x[yz] = Set.Quotient.complete G/H (x * [yz])
 
                     [xy]z~xyz = x~y→xz~yz [xy] (x * y) z [xy]~xy
-                    x[yz]~xyz = EquivBySubgroup.x~y→zx~zy G H [yz] (y * z) x [yz]~yz
+                    x[yz]~xyz = x~y→zx~zy [yz] (y * z) x [yz]~yz
 
-                    [xy]z~x[yz] = EquivBySubgroup.~-trans G H
-                        (EquivBySubgroup.~-trans G H [xy]z~xyz lemma)
-                        (EquivBySubgroup.~-sym G H x[yz]~xyz)
+                    [xy]z~x[yz] = ~-trans
+                        (~-trans [xy]z~xyz lemma)
+                        (~-sym x[yz]~xyz)
 
                 in Set.Quotient.x~y→[x]=[y] G/H ([xy] * z) (x * [yz]) [xy]z~x[yz] where
                     lemma : ((x * y) * z) ~ (x * (y * z))
@@ -472,7 +477,7 @@ module EquivByNormalSubgroup (G : Group) (N : NormalSubgroup G) where
                     .h∈H : P h
                     h∈H = subst P (Group.inverse-inverse G h) (Subgroup.*-inverse H (/ h) (subst P (Group.*-identityR G (/ h)) (irrAx h⁻¹e∈H)))
                     x~hx = g~hg x ⟨ h , h∈H ⟩
-                in Set.Quotient.x~c→[x]=[c] G/H (h * x) ⟨ x , x∈C ⟩ (EquivBySubgroup.~-sym G H x~hx)
+                in Set.Quotient.x~c→[x]=[c] G/H (h * x) ⟨ x , x∈C ⟩ (~-sym x~hx)
 
             *-identityR' : ∀ (x : C) → x *' e' ≡ x
             *-identityR' ⟨ x , x∈C ⟩ =
@@ -481,22 +486,22 @@ module EquivByNormalSubgroup (G : Group) (N : NormalSubgroup G) where
                     .h∈H : P h
                     h∈H = subst P (Group.inverse-inverse G h) (Subgroup.*-inverse H (/ h) (subst P (Group.*-identityR G (/ h)) (irrAx h⁻¹e∈H)))
                     x~xh = EquivBySubgroup.g~gh G H x ⟨ h , h∈H ⟩
-                in Set.Quotient.x~c→[x]=[c] G/H (x * h) ⟨ x , x∈C ⟩ (EquivBySubgroup.~-sym G H x~xh)
+                in Set.Quotient.x~c→[x]=[c] G/H (x * h) ⟨ x , x∈C ⟩ (~-sym x~xh)
 
             *-inverseL' : ∀ (x : C) → (/' x) *' x ≡ e'
             *-inverseL' ⟨ x , x∈C ⟩ =
                 let ⟨ h , h∈C ⟩ , h~e = Set.Quotient.complete G/H e
                     ⟨ [x⁻¹] , [x⁻¹]∈C ⟩ , [x⁻¹]~x⁻¹ = Set.Quotient.complete G/H (/ x)
                     [x⁻¹]x~x⁻¹x = x~y→xz~yz [x⁻¹] (/ x) x [x⁻¹]~x⁻¹
-                    [x⁻¹]x~e = EquivBySubgroup.~-substR G H ([x⁻¹] * x) (/ x * x) e [x⁻¹]x~x⁻¹x (Group.*-inverseL G x)
+                    [x⁻¹]x~e = ~-substR ([x⁻¹] * x) (/ x * x) e [x⁻¹]x~x⁻¹x (Group.*-inverseL G x)
                 in Set.Quotient.x~y→[x]=[y] G/H ([x⁻¹] * x) e [x⁻¹]x~e
 
             *-inverseR' : ∀ (x : C) → x *' (/' x) ≡ e'
             *-inverseR' ⟨ x , x∈C ⟩ =
                 let ⟨ h , h∈C ⟩ , h~e = Set.Quotient.complete G/H e
                     ⟨ [x⁻¹] , [x⁻¹]∈C ⟩ , [x⁻¹]~x⁻¹ = Set.Quotient.complete G/H (/ x)
-                    x[x⁻¹]~xx⁻¹ = EquivBySubgroup.x~y→zx~zy G H [x⁻¹] (/ x) x [x⁻¹]~x⁻¹
-                    x[x⁻¹]~e = EquivBySubgroup.~-substR G H (x * [x⁻¹]) (x * / x) e x[x⁻¹]~xx⁻¹ (Group.*-inverseR G x)
+                    x[x⁻¹]~xx⁻¹ = x~y→zx~zy [x⁻¹] (/ x) x [x⁻¹]~x⁻¹
+                    x[x⁻¹]~e = ~-substR (x * [x⁻¹]) (x * / x) e x[x⁻¹]~xx⁻¹ (Group.*-inverseR G x)
                 in Set.Quotient.x~y→[x]=[y] G/H (x * [x⁻¹]) e x[x⁻¹]~e
 
 record Hom (G₁ G₂ : Group) : Set₁ where
